@@ -40,8 +40,37 @@ Ejemplo: El item `56` estuvo en el estado `shipping_pending` en la fecha `2019-0
 
 1. Utilizando una sola query: Alguién quiere saber cuales son los `sku` de la orden con `order_number` igual a `19857758784` que se encuentran en el `status` actual de `shipping_pending`.
 
+SELECT ID, SKU
+FROM ORDER 
+INNER JOIN ORDERITEM oi
+ON ID = ORDER_ID 
+INNER JOIN MACHINEITEM mi
+ON mi.itemid = oi.id
+WHERE SKU = 19857758784 AND STATUS = 'SHIPPING_PENDING'
+AND mi.status =1;
+
+
 2. Utilizando 2 queries: Alguién quiere pasar los items que se encuentran actualmente en el estado `shipping_pending` de la  `order_number` igual a `19857758784` al status `shipping_approved`.
 
 *IMPORTANTE: En ambos casos no sabes los valores para item_id o order_id solo que el `order_number` de la orden es igual a `19857758784`
 
+UPDATE mi.is_active 
+SET mi.is_active =0 
+FROM ORDERITEM OI
+INNER JOIN ORDER O
+ON O.ID = O.ORDER_ID
+INNER JOIN MACHINEITEM mi 
+ON mi.itemid = oi.id
+WHERE ORDER_NUMBER = 19857758784;
 
+INSERT INTO MACHINEITEM
+(Itemid,is_active,status)
+VALUES
+(
+(SELECT id
+FROM ORDERITEM OI
+INNER JOIN ORDER O
+ON O.ID = O.ORDER_ID
+WHERE ORDER_NUMBER = 19857758784
+), 1, 'Shipping_Pending'
+);
